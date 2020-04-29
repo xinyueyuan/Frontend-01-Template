@@ -1,0 +1,88 @@
+<script>
+	function convertStringToNumber(string, radix = 10) {
+		if(radix === 10 && !(/^(0|([1-9]\d*)?)+([\.]?\d*([e|E][+|-]?\d+)*)?$/.test(string))) {
+			return NaN
+		}
+		if(radix === 2 && !(/^([01]+)$/.test(string))) {
+			return NaN
+		}
+		if(radix === 8 && !(/^([0-7]+)/.test(string))) {
+			return NaN
+		}
+		if(radix === 16 && !(/^([0-9a-fA-F]+)$/.test(string))) {
+			return NaN
+		}
+		//先分别拿到整数和小数
+		var interger = string.split('.')[0] ? string.split('.')[0].split('') : []
+		var fragment = string.split('.')[1] ? string.split('.')[1].split('') : []
+		var number = 0;
+		var exponent = 0;
+		for(var i = 0; i < interger.length; i++) {
+			//  针对整数部分的十六进制
+			var realNumber = interger[i].codePointAt(0) - '0'.codePointAt(0)
+			if(radix === 16 && !(realNumber >= 0 && realNumber <= 9)) {
+				switch(realNumber) {
+					case 17:
+					case 49:
+						realNumber = 10;
+						break;
+					case 18:
+					case 50:
+						realNumber = 11;
+						break;
+					case 19:
+					case 51:
+						realNumber = 12;
+						break;
+					case 20:
+					case 52:
+						realNumber = 13;
+						break;
+					case 21:
+					case 53:
+						realNumber = 14;
+						break;
+					case 22:
+					case 54:
+						realNumber = 15;
+						break;
+				}
+			}
+			if(radix === 10 && (interger[i] === 'E' || interger[i] === 'e')) {
+				if(interger[i + 1] === '+' || interger[i + 1] === '-'){
+					exponent = interger.slice(i + 2, interger.length).join('')
+					number *= 10 ** (interger[i + 1] + exponent);
+				} else {
+					exponent = interger.slice(i + 1, interger.length).join('')
+					number *= 10 ** exponent;
+				}
+
+				break;
+			}
+			number = number * radix;
+			number += realNumber;
+		}
+
+
+
+		var fraction = 1;
+		var fractionExponent = 0;
+		for(var i = 0; i < fragment.length; i++) {
+			if(radix === 10 && (fragment[i] === 'E' || fragment[i] === 'e')) {
+				if(fragment[i + 1] === '+' || fragment[i + 1] === '-'){
+					fractionExponent = fragment.slice(i + 2, fragment.length).join('')
+					number *= 10 ** (fragment[i + 1] + fractionExponent);
+				} else {
+					fractionExponent = fragment.slice(i + 1, fragment.length).join('')
+					number *= 10 ** fractionExponent;
+				}
+				break;
+			}
+			fraction = fraction / radix
+			number += (fragment[i].codePointAt(0) - '0'.codePointAt(0)) * fraction;
+		}
+		return number;
+	}
+
+	convertStringToNumber('.2e3', 10)
+</script>

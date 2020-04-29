@@ -1,0 +1,22 @@
+<script>
+	function convertNumberToString(number, radix = 10) {
+		console.log(number)
+		var integer = Math.floor(number);
+		var fraction = number - integer;
+		var string = '';
+		var fractionString = '';
+		
+		while(integer > 0) {
+			string = String(integer % radix) + string;
+			integer = Math.floor(integer / radix);
+		}
+		while(fraction && fractionString.length <= 10) {
+			fraction = fraction * radix;
+			fractionString += String(Math.floor(fraction));
+		}
+		fractionString && (fractionString = '.' + fractionString)
+
+		return `${string}${fractionString}`;
+	}
+	convertNumberToString(0xABC, 16)
+</script>
