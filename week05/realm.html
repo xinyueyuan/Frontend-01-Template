@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Tutorial Demo</title>
+	</head>
+	<body>
+		<div id="container"></div>
+		<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-3.1.0/build/g6.js"></script>
+		<script>
+			var globalProperties = [
+			    'eval',
+			    'isFinite',
+			    'isNaN',
+			    'parseFloat',
+			    'parseInt',
+			    'decodeURI',
+			    'decodeURIComponent',
+			    'encodeURI',
+			    'encodeURIComponent',
+			    'Array',
+			    'Date',
+			    'RegExp',
+			    'Promise',
+			    'Proxy',
+			    'Map',
+			    'WeakMap',
+			    'Set',
+			    'WeakSet',
+			    'Function',
+			    'Boolean',
+			    'String',
+			    'Number',
+			    'Symbol',
+			    'Object',
+			    'Error',
+			    'EvalError',
+			    'RangeError',
+			    'ReferenceError',
+			    'SyntaxError',
+			    'TypeError',
+			    'URIError',
+			    'ArrayBuffer',
+			    'SharedArrayBuffer',
+			    'DataView',
+			    'Float32Array',
+			    'Float64Array',
+			    'Int8Array',
+			    'Int16Array',
+			    'Int32Array',
+			    'Uint8Array',
+			    'Uint16Array',
+			    'Uint32Array',
+			    'Uint8ClampedArray',
+			    'Atomics',
+			    'JSON',
+			    'Math',
+			    'Reflect'
+			];
+
+			var queue = [];
+			for(var p of globalProperties) {
+			    queue.push({
+			        path: [p],
+			        object: this[p]
+			    })
+
+			}
+
+			var data = {
+			    id: 'realm',
+			    children: []
+			}
+
+
+			var firstChildren = [];
+
+			function getRealmTree(queue) {
+			    for(var i = 0; i < queue.length; i++) {
+			        var secondChildren = []
+			        var secondSet = Object.getOwnPropertyNames(queue[i].object)
+			        for(var j = 0; j < secondSet.length; j++) {
+			            var property = Object.getOwnPropertyDescriptor(queue[i].object, secondSet[j])
+			            var thirdChildren = []
+			            if(property.hasOwnProperty('value') && property.value instanceof Object) {
+			                //继续递归第三次
+			                for(let thirdId of Object.getOwnPropertyNames(property.value)) {
+			                    if(thirdId != 'name' && thirdId != 'length') {
+			                        thirdChildren.push({id: thirdId})
+			                    }
+			                }
+			            }
+			            if(property.hasOwnProperty('get') && (typeof property.get == "function")) {
+			                for(let thirdId of Object.getOwnPropertyNames(property.get)) {
+			                    if(thirdId != 'name' && thirdId != 'length') {
+			                        console.log(thirdId)
+			                        thirdChildren.push({id: thirdId})
+			                    }
+			                }
+			            }  
+			            if(property.hasOwnProperty('set') && (typeof property.set == "function")) {
+			                for(let thirdId of Object.getOwnPropertyNames(property.set)) {
+			                    if(thirdId != 'name' && thirdId != 'length') {
+			                        thirdChildren.push({id: thirdId})
+			                    }
+			                }
+			            }  
+			            if(secondSet[j] != 'name' && secondSet[j] != 'length') {
+			                var test = {id: secondSet[j]}
+			                if(thirdChildren.length) {
+			                    test = Object.assign(test, {children: thirdChildren})
+			                }
+			                secondChildren.push(test)
+			            }
+			            
+			        }
+			        var test = {id: queue[i].path.join('.')}
+			        if(secondChildren.length) {
+			            test = Object.assign(test, {children: secondChildren})
+			        }
+			        firstChildren[i] = test
+			    }
+
+			    data.children = firstChildren
+			    return data
+			}
+			data = getRealmTree(queue);
+
+			const width = document.getElementById('container').scrollWidth;
+		    const height = document.getElementById('container').scrollWidth;
+		    const graph = new G6.TreeGraph({
+		      container: 'container',
+		      width,
+		      height,
+		      modes: {
+		        default: [
+		          {
+		            type: 'collapse-expand',
+		            onChange: function onChange(item, collapsed) {
+		              const data = item.get('model').data;
+		              data.collapsed = collapsed;
+		              return true;
+		            },
+		          },
+		          'drag-canvas',
+		          'zoom-canvas',
+		        ],
+		      },
+		      defaultNode: {
+		        size: 26,
+		        anchorPoints: [
+		          [0, 0.5],
+		          [1, 0.5],
+		        ],
+		        style: {
+		          fill: '#C6E5FF',
+		          stroke: '#5B8FF9',
+		        },
+		      },
+		      defaultEdge: {
+		        type: 'cubic-horizontal',
+		        style: {
+		          stroke: '#A3B1BF',
+		        },
+		      },
+		      layout: {
+		        type: 'mindmap',
+		        direction: 'H',
+		        getHeight: () => {
+		          return 8;
+		        },
+		        getWidth: () => {
+		          return 8;
+		        },
+		        getVGap: () => {
+		          return 50;
+		        },
+		        getHGap: () => {
+		          return 50;
+		        },
+		      },
+		    });
+
+		    let centerX = 0;
+		    graph.node(function(node) {
+		      if (node.id === 'Modeling Methods') {
+		        centerX = node.x;
+		      }
+
+		      return {
+		        label: node.id,
+		        labelCfg: {
+		          position:
+		            node.children && node.children.length > 0
+		              ? 'left'
+		              : node.x > centerX
+		              ? 'right'
+		              : 'left',
+		          offset: 5,
+		        },
+		      };
+		    });
+
+		    graph.data(data);
+		    graph.render();
+		    graph.fitView();
+		</script>
+	</body>
+</html>
