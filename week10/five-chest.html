@@ -1,0 +1,163 @@
+<style type="text/css">
+	#board {
+		width: 520px;
+	}
+	
+	.child {
+		width: 50px;
+		height: 50px;
+		line-height: 50px;
+		display: inline-block;
+		background-color: lavender;
+		vertical-align: middle;
+		border: 1px solid white;
+		font-size: 30px;
+		text-align: center;
+	}
+</style>
+<div id="board"></div>
+<script type="text/javascript">
+	let pattern = [
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	]
+
+	let color = 2;
+
+
+	function show() {
+		let board = document.getElementById("board");
+		board.innerHTML = ''
+		for (let i = 0; i < 10; i++) {
+			for (let j = 0; j < 10; j++) {
+				let child = document.createElement("div");
+				child.innerHTML = 
+					pattern[i][j] === 2 ? "❌" :
+					pattern[i][j] === 1 ? "⭕️" :
+					'';
+				child.classList.add('child')
+				child.addEventListener('click', e => move(j, i) )
+
+				board.appendChild(child);
+			}
+		}
+	}
+
+	function move(x, y) {
+		if(pattern[y][x] !== 0) {
+			return
+		}
+		pattern[y][x] = 3 - color
+		color = 3 - color
+
+		if(check(pattern, color, x, y)) {
+			console.log(color === 2 ? "❌" : color === 1 ? "⭕️" : '', 'win')
+		}
+
+		show()
+	}
+
+
+	function check(pattern, color, x, y) {
+		// 传入当前点击的位置，判断周围四个格子内是否有能练成一个五子的线
+		let xcount = 1;
+		let ycount = 1;
+		let x1count = 1;
+		let y1count = 1;
+		for(let i = -4; i < 5; i++) {
+			if(i === 0) {
+				continue
+			}
+			if((x + i) > 9 || (x + i) < 0) {
+				continue
+			}
+			{
+				if(pattern[y][x + i] === color) {
+					xcount++;
+				}
+			}
+
+		}
+
+		for(let i = -4; i < 5; i++) {
+			if(i === 0) {
+				continue
+			}
+			if((y + i) > 9 || (y + i) < 0) {
+				continue
+			}
+			{
+				if(pattern[y + i][x] === color) {
+					ycount++;
+				}
+			}
+
+		}
+
+		for(let i = -4; i < 5; i++) {
+			// pattern[y + i][x + i] = 2
+			if(i === 0) {
+				continue
+			}
+			if((y + i) > 9 || (y + i) < 0 || (x + i) > 9 || (x + i) < 0) {
+				continue
+			}
+			{
+				if(pattern[y + i][x + i] === color) {
+					x1count++;
+				}
+			}
+
+		}
+
+		for(let i = -4; i < 5; i++) {
+			if(i === 0) {
+				continue
+			}
+			if((y + i) > 9 || (y + i) < 0 || (x - i) > 9 || (x - i) < 0) {
+				continue
+			}
+			{
+				if(pattern[y + i][x - i] === color) {
+					y1count++;
+				}
+			}
+
+		}
+
+
+		if(xcount >= 5 || ycount >= 5 || x1count >= 5 || y1count >= 5) {
+			return true
+		}
+
+		return false
+
+	}
+
+	
+
+	show();
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
