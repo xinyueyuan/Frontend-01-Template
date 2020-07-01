@@ -1,0 +1,57 @@
+<script>
+  class Trie {
+    constructor() {
+      // this.root = Array(26).fill(null); // 英文字母有大小写 也不保证能不能插入特殊字符  存数组站的空间也会比较大
+      this.root = Object.create(null);
+    }
+    insert(word) {
+      let node = this.root;
+      for(let c of word) {
+        if(!node[c]) {
+          node[c] = Object.create(null);
+        }
+        node = node[c];
+      }
+      if(!("$" in node)) {
+        node["$"] = 0; // 用来标志结尾和计数
+      }
+      node["$"]++;
+    }
+    most() {
+      // 两种方法： 1、insert时写入node的值 2、遍历most的时候拿
+      let max = 0;
+      let maxWord = null;
+      let visit = (node, word) => {
+        if(node.$ && node.$ > max) {
+          // console.log(node, word)
+          max = node.$;
+          maxWord = word;
+        }
+        // 对象用for in, map用for of
+        for(let p in node) {
+          visit(node[p], word + p); // 递归让word累加
+        }
+      }
+      visit(this.root, "");
+      console.log(maxWord)
+    }
+  }
+
+  function randomWord(length) {
+    var s = "";
+    for(let i = 0; i < length; i++) {
+      s += String.fromCharCode(Math.random() * 26 + "a".charCodeAt(0));
+    }
+    return s;
+  }
+
+  let trie = new Trie();
+
+  for(let i = 0; i < 100000; i++) {
+    trie.insert(randomWord(4));
+  }
+
+  // var trie = new Trie();
+  // trie.insert('good');;
+  // trie.insert('good');
+</script>
