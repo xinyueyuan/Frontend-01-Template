@@ -1,0 +1,79 @@
+<script>
+  // let handlers = [];
+  let handlers = new Map()
+
+  let usedReactivities = [];
+
+  let object = {
+    a: 1,
+    b: 2
+  }
+
+  function reactive(obj) {
+    return new Proxy(obj, { // 相当于object的代理 提供了各种钩子函数
+      get(obj, prop) {
+        console.log(obj, prop)
+        usedReactivities.push([obj, prop]);
+        return obj[prop];
+      },
+      set(obj, prop, val) {
+        console.log(handlers)
+        obj[prop] = val;
+        if(handlers.get(obj)) {
+          if(handlers.get(obj).get(prop)) {
+            for(let handler of handlers.get(obj).get(prop)) {
+              console.log(handler)
+              handler();
+            }
+          }
+        }
+        // for(let handler of handlers) {
+        //   handler();
+        // }
+        return obj[prop];
+      }
+    })
+  }
+
+  function effect(handler) {
+    // handler();// 直接调用 dummy不会和proxy有联系
+
+
+    usedReactivities = [];
+    handler();
+    // handlers.push(handler);
+    console.log(usedReactivities);
+    for(let usedReactivity of usedReactivities) {
+      let [obj, prop] = usedReactivity;
+      console.log([obj, prop]);
+      if(!handlers.has(obj)) {
+        handlers.set(obj, new Map());
+      }
+      if(!handlers.get(obj).has(prop)) {
+        handlers.get(obj).set(prop, []);
+      }
+      
+      handlers.get(obj).get(prop).push(handler);
+    }
+  }
+
+  let dummy;
+
+  let proxy = reactive(object);
+
+  effect(() => dummy = proxy.a);
+  // console.log(dummy);
+  proxy.a = 2;
+  // console.log(dummy);
+
+
+  // let proxy = new Proxy(object, { // 相当于object的代理 提供了各种钩子函数
+  //   get(obj, prop) {
+  //     console.log(obj, prop)
+  //     return obj[prop];
+  //   },
+  //   defineProperty(obj, prop, desc) {
+  //     return Object.defineProperty(obj, prop, desc);
+  //   }
+  // })
+</script>

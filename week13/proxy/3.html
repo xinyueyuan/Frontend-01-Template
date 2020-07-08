@@ -1,0 +1,32 @@
+<script>
+  let object = {
+    a: 1,
+    b: 2
+  }
+
+  function reactive(obj) {
+    return new Proxy(obj, {
+      get(obj, prop) {
+        console.log(obj, prop)
+        return obj[prop];
+      },
+      set(obj, prop, val) {
+        console.log(obj, prop, val)
+        return obj[prop] = val;
+      }
+    })
+  }
+
+  function effect(handler) {
+    handler();   // 此时dummy不会和proxy.a建立起observer之类的关系
+    console.log(handler)
+  }
+
+  let dummy;
+  let proxy = reactive(object);
+
+  effect(() => dummy = proxy.a);
+  console.log(dummy); 
+  proxy.a = 999;
+  console.log(dummy);
+</script>

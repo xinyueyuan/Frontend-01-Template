@@ -1,0 +1,25 @@
+<div id="dragable" style="width: 100px; height: 100px; background-color: pink;"></div>
+<script>
+  let dragable = document.getElementById('dragable');
+  let baseX = 0, baseY = 0;
+
+  document.addEventListener('mousedown', (event) => { // 事件如果绑定在dragable元素上, 拖到元素外面就没有mouseup了
+    let startX = event.clientX, startY = event.clientY;
+    
+    let move = (event) => {
+      // event.clientX  event.clientY  可视区域的坐标
+      let x = baseX + event.clientX - startX, y = baseY + event.clientY - startY;
+      dragable.style.transform = `translate(${x}px, ${y}px)`;
+    };
+    let up = event => {
+      baseX = baseX + event.clientX - startX;
+      baseY = baseY + event.clientY - startY;
+      console.log(baseX, baseY)
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('mouseup', up)
+    };
+    document.addEventListener('mousemove', move)
+    document.addEventListener('mouseup', up)
+  })
+  
+</script>

@@ -1,0 +1,107 @@
+<input id="r" type="range" min="0" max="255"/>
+<input id="g" type="range" min="0" max="255"/>
+<input id="b" type="range" min="0" max="255"/>
+
+<div id="color">color</div>
+
+<div id="text">{{hello}} world!</div>
+<script>
+  let handlers = new Map();
+  let reactivities = new Map();
+  let usedReactivities = []; // 全局的临时数组 需要让effect和reactive同时访问到
+  let object = {
+    a: {
+      x: 3
+    },
+    b: 2
+  }
+
+  function reactive(obj) {
+    if(reactivities.has(obj)) { // 避免重复包装
+      return reactivities.get(obj)
+    }
+    // proxy更完备  新加一个属性 object的getter和setter是收集不到的  
+    let proxy = new Proxy(obj, {
+      // vue中是在get的时候进行了依赖收集
+      get(obj, prop) {
+        usedReactivities.push([obj, prop]);
+        if(typeof obj[prop] === "object") {
+          return reactive(obj[prop]); // 这里不应该返回一个新的Proxy  否则会被认为是新的对象依赖
+        }
+        return obj[prop];
+      },
+      set(obj, prop, val) {
+        obj[prop] = val
+        if(handlers.get(obj)) {
+          if(handlers.get(obj).get(prop)) {
+            for(let handler of handlers.get(obj).get(prop)) {
+              handler();
+            }
+          }
+        }
+        return obj[prop];
+      }
+    })
+
+    reactivities.set(obj, proxy);
+    return proxy;
+  }
+
+  function effect(handler) {
+    usedReactivities = [];
+    handler();
+    for(let usedReactivity of usedReactivities) {
+      let [obj, prop] = usedReactivity;
+      if(!handlers.has(obj)) {
+        handlers.set(obj, new Map());
+      }
+      if(!handlers.get(obj).has(prop)) {
+        handlers.get(obj).set(prop, []);
+      }
+      
+      handlers.get(obj).get(prop).push(handler);
+    }{}
+  }
+
+  let p = reactive({r: 100, g: 200, b: 300}); 
+  effect(() => {
+    document.getElementById("r").value = p.r;  // 单向绑定
+    document.getElementById("g").value = p.g; 
+    document.getElementById("b").value = p.b;
+  });
+
+  // effect(() => {
+  //   document.getElementById("g").value = p.g;  // 单向绑定
+  // });
+
+  // effect(() => {
+  //   document.getElementById("b").value = p.b;  // 单向绑定
+  // });
+
+  document.getElementById("r").addEventListener("input", event => {
+    p.r = event.target.value;
+  })
+
+  document.getElementById("g").addEventListener("input", event => {
+    p.g = event.target.value;
+  })
+
+  document.getElementById("b").addEventListener("input", event => {
+    p.b = event.target.value;
+  })
+
+  effect(() => {
+    document.getElementById("color").style.backgroundColor = `rgb(${p.r}, ${p.g}, ${p.b})`;  // 单向绑定
+  });
+
+  let range = document.createRange();
+  range.setStart(document.getElementById("text").childNodes[0], 0);
+  range.setEnd(document.getElementById("text").childNodes[0], 9);
+  let data = reactive({text: "test"})
+
+  effect(() => {
+    range.extractContents();
+    range.insertNode(document.createTextNode(data.text));
+  });
+
+</script>

@@ -1,0 +1,36 @@
+<script>
+  let handlers = [];
+  let object = {
+    a: 1,
+    b: 2
+  }
+
+  function reactive(obj) {
+    return new Proxy(obj, {
+      get(obj, prop) {
+        console.log(obj, prop)
+        return obj[prop];
+      },
+      set(obj, prop, val) {
+        obj[prop] = val
+        for(let handler of handlers) {
+          handler(); // 在这里会修改掉dummy的值  这样写会有个问题 1、会执行所有的handler
+        }
+        return obj[prop];
+      }
+    })
+  }
+
+  function effect(handler) {
+    handler();
+    handlers.push(handler);
+  }
+
+  let dummy;
+  let proxy = reactive(object);
+
+  effect(() => dummy = proxy.a);
+  console.log(dummy); 
+  proxy.a = 999;
+  console.log(dummy); 
+</script>
