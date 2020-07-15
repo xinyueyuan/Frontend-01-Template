@@ -1,0 +1,81 @@
+<script>
+  // 高效但错误
+  // function find(source, pattern) {
+  //   let j = 0;
+  //   for(let i = 0; i < source.length; i++) {
+  //     let matched = true;
+  //     if(source[i] === pattern[j]) {
+  //       j++;
+  //     } else {
+  //       j = 0;
+  //     }
+  //     if(j === pattern.length) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  // find("abcxyz", "xy")
+  // find("abcxxyz", "xy") // false
+
+  
+
+  // function find(source, pattern) {
+  //   let j = 0;
+  //   for(let i = 0; i < source.length; i++) {
+  //     let matched = true;
+  //     if(source[i] === pattern[j]) {
+  //       j++;
+  //     } else {
+  //       j = 0;
+  //       if(source[i] === pattern[j]) { // 只解决了首字母重复的匹配问题
+  //         j++;
+  //       }
+  //     }
+  //     if(j === pattern.length) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  // 时间复杂度 m+n
+  function find(source, pattern) {
+    let table = new Array(pattern.length).fill(null);
+    let k = 0;
+    for(let j = 1; j < pattern.length; j++) {
+      if(pattern[j] === pattern[k]) {
+        // console.log(j, k, pattern[j], pattern[k])
+        k++;
+      } else {
+        k = 0;
+      }
+      table[j] = k;
+    }
+    console.log(table)
+
+
+    let j = 0;
+    for(let i = 0; i < source.length; i++) {
+      let matched = true;
+      console.log(i, j, source[i], pattern[j])
+      if(source[i] === pattern[j]) {
+        j++;
+      } else {
+        while(source[i] !== pattern[j] && j > 0) { // 用来处理多次循环
+          j = table[j - 1];
+        }
+        if(source[i] === pattern[j]) { 
+          j++;
+        } else {
+          j = 0;
+        }
+      }
+      if(j === pattern.length) {
+        return true;
+      }
+    }
+    return false;
+  }
+</script>

@@ -1,0 +1,20 @@
+<script>
+  // 时间复杂度 m*n
+  function find(source, pattern) {
+    for(let i = 0; i < source.length; i++) {
+      let matched = true;
+      for(let j = 0; j < pattern.length; j++) {
+        if(source[i + j] !== pattern[j]) {
+          matched = false;
+          break;
+        }
+      }
+      if(matched) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  find("abcxyz", "xy")
+</script>
