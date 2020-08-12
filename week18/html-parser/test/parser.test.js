@@ -77,7 +77,7 @@ it('with property 2', function () {
 });
 
 it('with property 3', function () {
-  let doc = parseHTML("<div id=a class='cls' data=\"abc\"/>"); 
+  let doc = parseHTML("<div id=  a class='cls' data=\"abc\"/>"); 
   let div = doc.children[0]
   let count = 0
   for(let attr of div.attributes) {
@@ -95,6 +95,26 @@ it('with property 3', function () {
     }
   }
   assert.equal(count, 3);
+});
+
+it('with property 4', function () {
+  let doc = parseHTML("<div id=a/>"); 
+  let div = doc.children[0]
+  for(let attr of div.attributes) {
+    if(attr.name === "id") {
+      assert.equal(attr.value, "a");
+    }
+  }
+});
+
+it('with property 5', function () {
+  let doc = parseHTML("<div id=a></div>"); 
+  let div = doc.children[0]
+  for(let attr of div.attributes) {
+    if(attr.name === "id") {
+      assert.equal(attr.value, "a");
+    }
+  }
 });
 
 it('script', function() {
@@ -129,13 +149,28 @@ it('attribute with no value', function () {
   assert.equal(div.type, "element");
 });
 
-
-
-it('attribute with no value', function () {
-  let doc = parseHTML("<div class id/>");
+it('attribute with no value2', function () {
+  let doc = parseHTML("<div   class id/>");
   let div = doc.children[0]
   assert.equal(div.tagName, "div");
   assert.equal(div.children.length, 0);
   assert.equal(div.type, "element");
 });
+
+it('self closing tag', function () {
+  let doc = parseHTML("<div/>");
+  let div = doc.children[0]
+  assert.equal(div.tagName, "div");
+  assert.equal(div.children.length, 0);
+  assert.equal(div.type, "element");
+});
+
+it('tag include no-asc character', function () {
+  try {
+    let doc = parseHTML("<div* />");
+  } catch (e) {
+    assert.equal(e.message, "Tag name not include non-asc character");
+  }
+});
+
 
