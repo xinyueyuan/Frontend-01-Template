@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 
-let filename = './package/cat.jpg'
+let filename = './package/cat.jpg' // 可以正确的传一张图片
 
 fs.stat(filename, (error, stat) => {
   const options = {
