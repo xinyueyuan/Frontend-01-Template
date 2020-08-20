@@ -1,5 +1,6 @@
 const http = require('http');
 const fs = require('fs');
+const unzip = require('unzipper')
 
 // Create an HTTP server
 const server = http.createServer((req, res) => {
@@ -9,8 +10,18 @@ const server = http.createServer((req, res) => {
     return;
   }
   console.log(filename, "filename")
-  let writeStream = fs.createWriteStream('../server/public/' + filename)
-  req.pipe(writeStream);
+  // let writeStream = fs.createWriteStream('../server/public/' + filename)
+  let writeStream = unzip.Extract({
+    path: '../server/public',
+  })
+  req.pipe(writeStream); // 快捷写法
+  // req.on('data', (trunk) => {
+  //   writeStream.write(trunk)
+  // })
+  // req.on('end', (trunk) => {
+  //   writeStream.end(trunk)
+  // })
+  
 
   res.on('end', () => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
